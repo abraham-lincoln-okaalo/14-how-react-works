@@ -68,8 +68,34 @@ function TabContent({ item }) {
   const [showDetails, setShowDetails] = useState(true);
   const [likes, setLikes] = useState(0);
 
+  // console.log("Render"); //batched updates
+
+  function handleUndo() {
+    setShowDetails(true);
+    setLikes(0);
+    console.log(likes); //stale state //state is updated after re-rendering not immediately after function call
+  }
+
+  function handleUndoLater() {
+    setTimeout(handleUndo, 2000);
+    console.log("handleUndoLater");
+  }
   function handleInc() {
-    setLikes(likes + 1);
+    // setLikes(likes + 1);
+    setLikes((likes) => likes + 1);
+  }
+
+  function handleTripleInc() {
+    //This will work because callbacks get access to the latest state
+    setLikes((likes) => likes + 1); //likes=1
+    setLikes((likes) => likes + 1); //likes=1 + 2
+    setLikes((likes) => likes + 1); //likes=2 + 1
+    // setLikes(likes + 3); = this will work
+
+    //The below will not add 3 because the state is stale, and state updates asynchronously
+    //setLikes(likes + 1); //likes=0 + 1
+    //setLikes(likes + 1); //likes=0 + 1
+    //setLikes(likes + 1); //likes=0 + 1
   }
 
   return (
@@ -85,13 +111,13 @@ function TabContent({ item }) {
         <div className="hearts-counter">
           <span>{likes} ❤️</span>
           <button onClick={handleInc}>+</button>
-          <button>+++</button>
+          <button onClick={handleTripleInc}>+++</button>
         </div>
       </div>
 
       <div className="tab-undo">
-        <button>Undo</button>
-        <button>Undo in 2s</button>
+        <button onClick={handleUndo}>Undo</button>
+        <button onClick={handleUndoLater}>Undo in 2s</button>
       </div>
     </div>
   );
